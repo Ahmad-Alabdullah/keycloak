@@ -1,0 +1,120 @@
+# Copyright (C) 2021 - present Juergen Zimmermann, Hochschule Karlsruhe
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+# siehe app.module.ts
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"Funktionen, um PKWs-Daten zu lesen"
+type Query {
+  pkws(bauart: String): [Pkw!]
+
+  pkw(id: ID!): Pkw
+}
+
+"Funktionen, um PKWs neu anzulegen, zu aktualisieren oder zu löschen"
+type Mutation {
+  create(input: PkwInput!): CreatePayload
+
+  update(input: PkwUpdateInput!): UpdatePayload
+
+  delete(id: ID!): Boolean
+
+  # Mutation, weil z.B. der Login-Zeitpunkt im IDM-System gespeichert wird
+  login(username: String!, password: String!): LoginResult
+}
+
+"Daten zur Bauart eines Pkws"
+type Bauart {
+  model: String!
+  variante: String
+}
+
+"Datenschema zu einem Pkw, das gelesen wird"
+type Pkw {
+  # ID ist bei Apollo ein String
+  id: Int!
+  version: Int!
+  fin: String!
+  ncapRating: Int
+  motor: Motor
+  preis: Float!
+  lieferbar: Boolean
+  releaseDatum: String
+  homepage: String
+  schlagwoerter: [String]
+  # 1:1-Beziehung
+  bauart: Bauart!
+  # field mit @ResolveField
+  rabatt(short: Boolean): String!
+}
+
+"Enum-Typ für die Art eines Pkw-Motors"
+enum Motor {
+  VERBRENNER
+  ELEKTRO
+}
+
+"Daten zur Bauart eines neuen Pkws"
+input BauartInput {
+  model: String!
+  variante: String
+}
+
+"Daten für einen neuen Pkw"
+input PkwInput {
+  fin: String
+  ncapRating: Int
+  motor: Motor
+  preis: Float
+  rabatt: Float
+  lieferbar: Boolean
+  releaseDatum: String
+  homepage: String
+  schlagwoerter: [String]
+  bauart: BauartInput!
+}
+
+type CreatePayload {
+  id: Int
+}
+
+"Daten für einen zu ändernden Pkw"
+input PkwUpdateInput {
+  id: ID
+  version: Int
+  fin: String
+  ncapRating: Int
+  motor: Motor
+  preis: Float
+  rabatt: Float
+  lieferbar: Boolean
+  releaseDatum: String
+  homepage: String
+  schlagwoerter: [String]
+}
+
+type UpdatePayload {
+  version: Int
+}
+
+type LoginResult {
+  token: String!
+  expiresIn: String!
+  roles: [String]!
+}

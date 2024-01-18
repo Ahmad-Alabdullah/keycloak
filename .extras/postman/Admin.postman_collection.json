@@ -1,0 +1,121 @@
+{
+	"info": {
+		"_postman_id": "e2d7979c-7a53-43cf-bb83-bc8230dcc327",
+		"name": "Admin",
+		"description": "Administrative Aufgaben, z.B. Abfragen zu Liveness und Readiness",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "27836818",
+		"_collection_link": "https://martian-crater-644415.postman.co/workspace/pkw~49b5f5c7-f3be-4ce6-aa7f-7632caf895e1/collection/27836818-e2d7979c-7a53-43cf-bb83-bc8230dcc327?action=share&source=collection_link&creator=27836818"
+	},
+	"item": [
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Liveness",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Statuscode 200', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test('Content-Type application/json', () => {\r",
+									"    const { response } = pm;\r",
+									"    const contentType = response.headers.get('Content-Type');\r",
+									"    pm.expect(contentType).to.match(/^application\\/json(; charset=utf-8)?/u);\r",
+									"});\r",
+									"pm.test('Status im Body ueberpruefen', () => {\r",
+									"    const body = pm.response.json();\r",
+									"    const { status, info, error } = body\r",
+									"    pm.expect(status).to.be.equal('ok');\r",
+									"    pm.expect(info.appserver.status).to.be.equal('up');\r",
+									"    pm.expect(error).to.be.an('object').that.is.empty;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{health_url}}/liveness"
+					},
+					"response": []
+				},
+				{
+					"name": "Readiness",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Statuscode 200', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test('Content-Type application/json', () => {\r",
+									"    const { response } = pm;\r",
+									"    const contentType = response.headers.get('Content-Type');\r",
+									"    pm.expect(contentType).to.match(/^application\\/json(; charset=utf-8)?/u);\r",
+									"});\r",
+									"pm.test('Status im Body ueberpruefen', () => {\r",
+									"    const body = pm.response.json();\r",
+									"    const { status, info, error } = body\r",
+									"    pm.expect(status).to.be.equal('ok');\r",
+									"    pm.expect(info.db.status).to.be.equal('up');\r",
+									"    pm.expect(error).to.be.an('object').that.is.empty;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": "{{health_url}}/readiness"
+					},
+					"response": []
+				}
+			],
+			"description": "Abfragen zu Liveness und Readiness für z.B. Kubernetes."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "health_url",
+			"value": "{{base_url}}/health",
+			"type": "string"
+		}
+	]
+}

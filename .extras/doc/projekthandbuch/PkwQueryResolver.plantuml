@@ -1,0 +1,80 @@
+' Copyright (C) 2019 - present Juergen Zimmermann, Hochschule Karlsruhe
+'
+' This program is free software: you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation, either version 3 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+' Preview durch <Alt>d
+
+@startuml Controller-Klasse
+
+interface Promise<T>
+
+package @nestjs/graphql {
+  class "@Resolver" as Resolver
+  hide Resolver circle
+
+  class "@UseInterceptors" as UseInterceptors
+  hide UseInterceptors circle
+
+  class "@Query" as Query
+  hide Query circle
+
+  class "@Args" as Args
+  hide Args circle
+
+  Resolver .left[hidden].> Promise
+}
+
+package pkw {
+  package entity {
+    class Pkw <<entity>>
+  }
+
+  package service {
+    class PkwReadService << control >>
+  }
+
+  package graphql #DDDDDD {
+    class "type PkwDTO = Omit<Pkw, 'bauart' | 'aktualisiert' | 'erzeugt'" as PkwDTO
+    hide PkwDTO circle
+
+    interface IdInput {
+        id: number
+    }
+
+    class PkwQueryResolver << control >> << @Resolver() >> << @UseInterceptors() >> {
+      + @Query() async pkw(@Args() id: IdInput): Promise<PkwDTO>
+      + @Query() async pkws(@Args() model: string | undefined): Promise<PkwDTO[]>
+    }
+
+    PkwQueryResolver o-up-> "1" PkwReadService : service
+    PkwQueryResolver ..> PkwDTO
+    PkwQueryResolver ..> IdInput
+    PkwDTO ..> Pkw
+    PkwQueryResolver ..> Resolver
+
+    PkwQueryResolver ..> Promise
+
+    PkwDTO .[hidden].> Pkw
+    Pkw .[hidden].> Promise
+    PkwReadService .[hidden].> Promise
+    Pkw .[hidden].> Resolver
+    PkwReadService .[hidden].> Resolver
+  }
+}
+
+hide empty members
+
+footer Pkw Projekt Team
+
+@enduml

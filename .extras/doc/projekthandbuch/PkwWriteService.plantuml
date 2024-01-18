@@ -1,0 +1,88 @@
+' Copyright (C) 2019 - present Juergen Zimmermann, Hochschule Karlsruhe
+'
+' This program is free software: you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation, either version 3 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+' Preview durch <Alt>d
+
+@startuml Anwendungskern
+
+interface Promise<T>
+
+package @nestjs/common {
+  class "@Injectable" as Injectable
+  hide Injectable circle
+}
+
+package typeorm {
+  class Repository<T>
+}
+
+package @nestjs/typeorm {
+  class "@InjectRepository" as InjectRepository
+  hide InjectRepository circle
+}
+
+package mail {
+  class MailService
+}
+
+package pkw {
+  package entity {
+    class Pkw
+  }
+
+  package service #DDDDDD {
+    class PkwInvalid
+    class ModelExists
+    class FinExists
+    class VersionInvalid
+    class VersionOutdated
+
+    class PkwWriteService << control >> <<@Injectable()>> {
+      + async create(pkw: Pkw): Promise<string|PkwInvalid|ModelExists|FinExists>
+      + async update(id: number, pkw: Pkw, version: string): Promise<number|PkwInvalid|ModelExists|FinExists|VersionInvalid|VersionOutdated>
+      + async delete(id: number): Promise<boolean>
+    }
+
+    PkwWriteService o--> "1" PkwValidationService: validationService
+    PkwWriteService o--> "1" PkwReadService: readService
+    PkwWriteService o--> "1" Repository: @InjectRepository repo
+    PkwWriteService o--> "1" MailService: mailService
+
+    PkwWriteService .up.> Injectable
+    PkwWriteService .up.> InjectRepository
+
+    PkwWriteService .up.> Promise
+    PkwWriteService ..> Pkw
+    PkwWriteService .up.> PkwInvalid
+    PkwWriteService .up.> ModelExists
+    PkwWriteService .up.> FinExists
+    PkwWriteService .up.> VersionInvalid
+    PkwWriteService .up.> VersionOutdated
+
+    PkwInvalid .up[hidden].> Pkw
+    Pkw .up[hidden].> Promise
+    Pkw .up[hidden].> Injectable
+    Pkw .up[hidden].> InjectRepository
+    ModelExists .up[hidden].> Pkw
+    PkwValidationService .[hidden].> Repository
+    PkwValidationService .[hidden].> MailService
+  }
+}
+
+hide empty members
+
+footer (c) Pkw Projekt Team
+
+@enduml
